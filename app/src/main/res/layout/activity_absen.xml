@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.AbsenActivity">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/login_color">
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="30dp"
+                android:text="@string/data_karyawan"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                style="@style/TextProfilePage"/>
+
+            <RelativeLayout
+                android:id="@+id/constraintLayout1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/white"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView1">
+
+                <TextView
+                    android:id="@+id/tv_nik"
+                    android:text="@string/nik"
+                    style="@style/TextProfilePage.Title"/>
+
+                <TextView
+                    android:id="@+id/tv_colon_nik"
+                    android:layout_toEndOf="@id/tv_nik"
+                    style="@style/TextProfilePage.Colon"/>
+
+                <TextView
+                    android:id="@+id/txt_nik"
+                    android:layout_toEndOf="@id/tv_colon_nik"
+                    android:textColor="@color/login_color"
+                    android:textSize="20sp"
+                    style="@style/TextProfilePage"
+                    tools:text="31710703019500012314142"/>
+
+                <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_below="@id/txt_nik"
+                    android:text="@string/nama"
+                    style="@style/TextProfilePage.Title"/>
+
+                <TextView
+                    android:id="@+id/tv_colon_name"
+                    android:layout_below="@id/txt_nik"
+                    android:layout_toEndOf="@id/tv_name"
+                    style="@style/TextProfilePage.Colon"/>
+
+                <TextView
+                    android:id="@+id/txt_name"
+                    android:layout_below="@id/txt_nik"
+                    android:layout_toEndOf="@id/tv_colon_nik"
+                    android:textColor="@color/login_color"
+                    android:textSize="20sp"
+                    style="@style/TextProfilePage"
+                    tools:text="Nama Karyawan"/>
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/waktu"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/constraintLayout1"
+                style="@style/TextProfilePage"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/white"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+                <TextClock
+                    android:id="@+id/text_clock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/login_color"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="03-Jan-1995 01:00:00" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/lokasi"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+                style="@style/TextProfilePage"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/white"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView3">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
