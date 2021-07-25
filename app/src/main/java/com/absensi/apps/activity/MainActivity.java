@@ -1,11 +1,21 @@
 package com.absensi.apps.activity;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -48,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         getWindow().setStatusBarColor(Color.parseColor("#A81E5E4F"));
 
@@ -72,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK));
             finish();
         } else {
+            checkPermission();
             Gson gson = new Gson();
             String json = spManager.getSpUser();
 
@@ -143,11 +156,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             JSONObject jsonObject = list.getJSONObject(i);
                             absen = new Absen(jsonObject);
                         }
-                        Log.d(TAG, absen.getTime_out());
                         if (absen.getTime_out().equals("") || absen.getTime_out().equals("null")) {
                             txtPesan.setText("Selamat bekerja");
                             txtPesan2.setText("Klik tombol 'ABSEN PULANG' jika telah selesai bekerja");
                             spManager.saveString(SPManager.SP_STATUS_ABSEN, "MASUK");
+                            spManager.saveInt(SPManager.SP_ID_ABSEN, Integer.parseInt(absen.getId()));
                             txtAbsen = "Absen Pulang";
                         } else {
                             txtPesan.setText("Terima kasih. Selamat Istirahat.");
@@ -216,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 spManager.saveString(SPManager.SP_STATUS_ABSEN, "");
                 spManager.saveInt(SPManager.SP_USER_ID, 0);
                 spManager.saveInt(SPManager.SP_USER_NIK, 0);
+                spManager.saveInt(SPManager.SP_ID_ABSEN, 0);
                 spManager.saveBoolean(SPManager.SP_LOGIN, false);
                 finish();
                 startActivity(getIntent()
@@ -232,6 +246,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btnRiwayat.setEnabled(true);
                 startActivity(new Intent(MainActivity.this, RiwayatAbsenActivity.class));
             }, 500);
+        }
+    }
+
+    public void checkPermission() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "checkPermission: granted");
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            for(String permission: permissions){
+                if(ActivityCompat.shouldShowRequestPermissionRationale(this, permission)){
+                    //denied
+                    this.checkPermission();
+                    Log.e("denied", permission);
+                }else{
+                    if(ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED){
+                        //allowed
+                        Log.d("allowed", permission);
+                    } else{
+                        //set to never ask again
+                        AlertDialog.Builder alBuilderBuilder = new AlertDialog.Builder(this);
+
+                        alBuilderBuilder.setTitle("Warning");
+                        alBuilderBuilder
+                                .setMessage("Aplikasi ini membutuhkan izin akses kamera dan lokasi, silahkan izinkan aplikasi pada pengaturan perizinan")
+                                .setCancelable(false)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        intent.setData(uri);
+                                        startActivity(intent);
+                                    }
+                                });
+                        AlertDialog alertDialog = alBuilderBuilder.create();
+                        alertDialog.show();
+                        Log.e("set to never ask again", permission);
+                        //do something here.
+                    }
+                }
+            }
         }
     }
 }

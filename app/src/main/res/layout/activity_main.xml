@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@android:color/white"
     tools:context=".activity.MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -107,14 +107,14 @@
             android:id="@+id/btn_absen"
             layout="@layout/btn_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="28dp"/>
 
         <include
             android:id="@+id/btn_riwayat"
             layout="@layout/btn_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"/>
+            android:layout_height="wrap_content"/>
 
         <include
             android:id="@+id/btn_keluar"

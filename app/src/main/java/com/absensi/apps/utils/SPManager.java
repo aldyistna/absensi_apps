@@ -12,6 +12,7 @@ public class SPManager {
     public static final String SP_USER_NIK = "userNIK";
     public static final String SP_USER_NAME = "userName";
     public static final String SP_STATUS_ABSEN = "statusAbsen";
+    public static final String SP_ID_ABSEN = "idAbsen";
     public static final String SP_LOGIN = "login";
 
     private final SharedPreferences sp;
@@ -56,6 +57,10 @@ public class SPManager {
 
     public int getSpUserNIK() {
         return sp.getInt(SP_USER_NIK, 0);
+    }
+
+    public int getIdAbsen() {
+        return sp.getInt(SP_ID_ABSEN, 0);
     }
 
     public boolean getSPLogin() {

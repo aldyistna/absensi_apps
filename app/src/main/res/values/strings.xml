@@ -10,9 +10,10 @@
     <string name="please_wait">Mohon tunggu ..</string>
     <string name="done">Selesai</string>
     <string name="button">Button</string>
-    <string name="waktu">Waktu</string>
+    <string name="waktu_dan_lokasi">Waktu &amp; Lokasi</string>
     <string name="lokasi">Lokasi</string>
     <string name="data_karyawan">Data Karyawan</string>
     <string name="colon">:</string>
     <string name="nama">Nama</string>
+    <string name="foto">Foto</string>
 </resources>
