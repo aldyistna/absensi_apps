@@ -14,16 +14,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.absensi.apps.BuildConfig;
 import com.absensi.apps.R;
-import com.absensi.apps.entity.Absen;
 import com.absensi.apps.entity.Karyawan;
 import com.absensi.apps.utils.ProgressButton;
 import com.absensi.apps.utils.SPManager;
@@ -32,13 +27,9 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 
 import cz.msebera.android.httpclient.Header;
@@ -70,7 +61,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         btnLogin = findViewById(R.id.btn_masuk);
         progressButton = new ProgressButton(LoginActivity.this, btnLogin);
-        progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#E6224EA5"));
+        progressButton.changeSizeButton(50);
+        progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#A3CCE0"));
         btnLogin.setOnClickListener(this);
     }
 
@@ -98,12 +90,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (networkInfo != null && networkInfo.isConnected()) {
                     login(userName, pass);
                 } else {
-                    progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#E6224EA5"));
+                    progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#A3CCE0"));
                     btnLogin.setEnabled(true);
                     makeToast(getString(R.string.no_internet));
                 }
             } else {
-                progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#E6224EA5"));
+                progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#A3CCE0"));
                 btnLogin.setEnabled(true);
                 makeToast("NIK dan password tidak boleh kosong");
             }
@@ -125,7 +117,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 try {
                     JSONObject resObject = new JSONObject(result);
                     if (resObject.getString("status").equals("0")) {
-                        progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#E6224EA5"));
+                        progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#A3CCE0"));
                         btnLogin.setEnabled(true);
                         makeToast("NIK atau password salah !");
                     } else {
@@ -147,7 +139,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         finish();
                     }
                 } catch (JSONException e) {
-                    progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#E6224EA5"));
+                    progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#A3CCE0"));
                     btnLogin.setEnabled(true);
                     makeToast("Terjadi kesalahan, silahkan login ulang");
                     Log.e(TAG + " JSONException", Objects.requireNonNull(e.getMessage()));
@@ -156,7 +148,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#E6224EA5"));
+                progressButton.setTextButton("Login", Color.WHITE, Color.parseColor("#A3CCE0"));
                 btnLogin.setEnabled(true);
                 makeToast("Terjadi kesalahan, silahkan login ulang");
                 Log.e(TAG + " onFailure", Objects.requireNonNull(error.getMessage()));

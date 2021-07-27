@@ -16,4 +16,14 @@
     <string name="colon">:</string>
     <string name="nama">Nama</string>
     <string name="foto">Foto</string>
+
+    <string name="msg_blm_absen">Anda belum absen hari ini !</string>
+    <string name="msg_blm_absen_sub">Silahkan klik tombol \'ABSEN MASUK\' di bawah !</string>
+    <string name="msg_absen_pulang">Selamat bekerja</string>
+    <string name="msg_absen_pulang_sub">Klik tombol \'ABSEN PULANG\' jika telah selesai bekerja</string>
+    <string name="msg_sudah_absen">Terima kasih. Selamat Istirahat.</string>
+    <string name="msg_sudah_absen_sub">Sampai jumpa besok</string>
+    <string name="pulang">Pulang</string>
+    <string name="masuk">Masuk</string>
+    <string name="no_data">Anda belum pernah absen</string>
 </resources>

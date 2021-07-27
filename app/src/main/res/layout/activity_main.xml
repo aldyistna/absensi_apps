@@ -11,7 +11,9 @@
         android:id="@+id/layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="#A81E5E4F"
+        android:paddingTop="40dp"
+        android:paddingBottom="20dp"
+        android:background="@drawable/ic_bg_top"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">

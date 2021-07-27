@@ -6,16 +6,18 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <uses-feature android:name="android.hardware.location.gps"
-        android:required="true"/>
-    <uses-feature android:name="android.hardware.camera"
-        android:required="true"/>
-
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -38,19 +40,24 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key"/>
+            android:value="@string/google_maps_key" />
 
-        <activity android:name=".activity.AbsenActivity"
-            android:parentActivityName=".activity.MainActivity"/>
+        <activity
+            android:name=".activity.AbsenActivity"
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/NoBarTheme"/>
         <activity
             android:name=".activity.RiwayatAbsenActivity"
             android:parentActivityName=".activity.MainActivity"/>
         <activity
             android:name=".activity.LoginActivity"
-            android:theme="@style/NoBarTheme" />
+            android:theme="@style/NoBarTheme"/>
         <activity
             android:name=".activity.MainActivity"
-            android:theme="@style/NoBarTheme">
+            android:theme="@style/NoBarTheme"/>
+
+        <activity android:name=".activity.SplashScreenActivity"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

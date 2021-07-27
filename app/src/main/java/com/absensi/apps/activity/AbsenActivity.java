@@ -1,13 +1,13 @@
 package com.absensi.apps.activity;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -22,9 +22,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextClock;
 import android.widget.TextView;
@@ -32,29 +34,32 @@ import android.widget.Toast;
 
 import com.absensi.apps.BuildConfig;
 import com.absensi.apps.R;
-import com.absensi.apps.entity.Absen;
 import com.absensi.apps.entity.Karyawan;
 import com.absensi.apps.utils.ProgressButton;
 import com.absensi.apps.utils.SPManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -74,13 +79,15 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
 
     ImageView imgFoto;
     TextView titleLocation, txtNIK;
-    ProgressButton progressButton;
-    View btnSave;
+    ProgressButton progressButton, backButton;
+    View btnSave, btnBack;
     //    private SPManager spManager;
     File images = null;
     String currentPhotoPath = "";
     private GoogleMap mMap;
     private Location lastKnownLocation;
+    private LocationRequest locationRequest;
+    Marker mCurrLocationMarker;
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int DEFAULT_ZOOM = 15;
     String absen = "";
@@ -91,9 +98,12 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
         setContentView(R.layout.activity_absen);
 
         absen = getIntent().getStringExtra(EXTRA_ABSEN);
-        if (getSupportActionBar() != null) {
+        /*if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(absen);
-        }
+        }*/
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
         spManager = new SPManager(this);
 
@@ -119,8 +129,13 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
         imgFoto.setOnClickListener(v -> captureImage());
 
         btnSave = findViewById(R.id.btn_save);
+        btnBack = findViewById(R.id.btn_back);
         progressButton = new ProgressButton(AbsenActivity.this, btnSave);
-        progressButton.setTextButton("Save", Color.WHITE, Color.parseColor("#E6224EA5"));
+        backButton = new ProgressButton(AbsenActivity.this, btnBack);
+        progressButton.setTextButton("Save", Color.WHITE, Color.parseColor("#A3CCE0"));
+        backButton.setTextButton("Back", Color.WHITE, Color.parseColor("#AE6262"));
+
+        btnBack.setOnClickListener(v -> onBackPressed());
         btnSave.setOnClickListener(v -> {
             ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = null;
@@ -132,15 +147,25 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
                 return;
             }
             if (networkInfo != null && networkInfo.isConnected()) {
-                progressButton.buttonActivated();
+                progressButton.buttonActivatedSave();
                 btnSave.setEnabled(false);
+                btnBack.setEnabled(false);
                 saveAbsen();
             } else {
                 makeToast(getString(R.string.no_internet));
             }
         });
 
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(500);
+        locationRequest.setFastestInterval(300);
+        locationRequest.setSmallestDisplacement(5f);
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         assert mapFragment != null;
@@ -151,16 +176,22 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
         AsyncHttpClient client = new AsyncHttpClient();
         String urlPath = "api/absens";
 
+        @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        Date date = new Date();
+        String dateNow = dateFormat.format(date);
+        Log.d(TAG, "saveAbsen: " + dateNow);
+
         RequestParams params = new RequestParams();
         params.put("location", titleLocation.getText());
         params.put("nik", txtNIK.getText());
+        params.put("date", dateNow);
         File file = null;
         if (!currentPhotoPath.equals("")) {
             try {
                 file = new File(currentPhotoPath);
                 params.put("file", file);
             } catch (FileNotFoundException e) {
-                progressButton.setTextButton("Save", Color.WHITE, Color.parseColor("#E6224EA5"));
+                progressButton.setTextButton("Save", Color.WHITE, Color.parseColor("#A3CCE0"));
                 makeToast("Silahkan masukkan foto");
                 return;
             }
@@ -175,52 +206,35 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
         client.post(API_URL + urlPath, params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                String result = new String(responseBody);
-                try {
-                    JSONObject resObject = new JSONObject(result);
-                    if (resObject.has("data")) {
-                        JSONObject val = resObject.getJSONObject("data");
-                        Absen absens = new Absen(val);
-                        if (images != null) {
-                            if (images.exists()) {
-                                Boolean deleted = images.delete();
-                                Log.e(TAG + " onSuccess", String.valueOf(deleted));
-                            }
-                        }
-                        if (finalFile != null) {
-                            if (finalFile.exists()) {
-                                Boolean deleted = images.delete();
-                                Log.e(TAG + " onSuccess", String.valueOf(deleted));
-                            }
-                        }
-                        if (absen.equals("Absen Masuk")) {
-                            spManager.saveString(SPManager.SP_STATUS_ABSEN, "MASUK");
-                            spManager.saveInt(SPManager.SP_ID_ABSEN, Integer.parseInt(absens.getId()));
-                        } else if (absen.equals("Absen Pulang")) {
-                            spManager.saveString(SPManager.SP_STATUS_ABSEN, "PULANG");
-                            spManager.saveInt(SPManager.SP_ID_ABSEN, 0);
-                        }
-                        progressButton.buttonFinished();
-                        makeToast("Berhasil " + absen);
-                        Handler handler = new Handler();
-                        handler.postDelayed(() -> {startActivity(new Intent(AbsenActivity.this, MainActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK));
-                            finish();
-                        }, 500);
+                if (images != null) {
+                    if (images.exists()) {
+                        Boolean deleted = images.delete();
+                        Log.e(TAG + " onSuccess", String.valueOf(deleted));
                     }
-                } catch (Exception e) {
-                    progressButton.setTextButton("Save", Color.WHITE, Color.parseColor("#E6224EA5"));
-                    btnSave.setEnabled(true);
-                    makeToast("Terjadi kesalahan, silahkan absen ulang");
-                    Log.e(TAG + " JSONException", Objects.requireNonNull(e.getMessage()));
                 }
+                if (finalFile != null) {
+                    if (finalFile.exists()) {
+                        Boolean deleted = images.delete();
+                        Log.e(TAG + " onSuccess", String.valueOf(deleted));
+                    }
+                }
+                spManager.saveString(SPManager.SP_DATE_ABSEN, "");
+                progressButton.buttonFinished();
+                makeToast("Berhasil " + absen);
+                Handler handler = new Handler();
+                handler.postDelayed(() -> {
+                    startActivity(new Intent(AbsenActivity.this, MainActivity.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK));
+                    finish();
+                }, 500);
 
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                progressButton.setTextButton("Save", Color.WHITE, Color.parseColor("#E6224EA5"));
+                progressButton.setTextButton("Save", Color.WHITE, Color.parseColor("#A3CCE0"));
                 btnSave.setEnabled(true);
+                btnBack.setEnabled(true);
                 makeToast("Terjadi kesalahan, silahkan absen ulang");
                 Log.e(TAG + " onFailure", Objects.requireNonNull(error.getMessage()));
             }
@@ -287,20 +301,22 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
 
-        this.mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-            @Nullable
-            @Override
-            public View getInfoWindow(@NonNull Marker marker) {
-                return null;
-            }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            return;
+        }
 
-            @Nullable
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, new LocationCallback() {
             @Override
-            public View getInfoContents(@NonNull Marker marker) {
-                titleLocation.setText(marker.getTitle());
-                return null;
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                updateLocationUI();
+                getDeviceLocation();
             }
-        });
+        }, Looper.myLooper());
+        mMap.setMyLocationEnabled(true);
 
         updateLocationUI();
         getDeviceLocation();
@@ -320,13 +336,9 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
 
     private void getDeviceLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
             return;
         }
         Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
@@ -335,9 +347,16 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
                 // Set the map's camera position to the current location of the device.
                 lastKnownLocation = task.getResult();
                 if (lastKnownLocation != null) {
+                    if (mCurrLocationMarker != null) {
+                        mCurrLocationMarker.remove();
+                    }
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(lastKnownLocation.getLatitude(),
                                     lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+
+                    LatLng latLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 
                     Geocoder geo = new Geocoder(AbsenActivity.this, Locale.getDefault());
                     List<Address> addresses;

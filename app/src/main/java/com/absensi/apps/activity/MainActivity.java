@@ -7,9 +7,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -17,8 +17,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,15 +55,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     String txtAbsen = "";
 
+    LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+    Resources r;
+    int left, top, right, bottom;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        r = this.getResources();
+        left = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 0, r.getDisplayMetrics());
+        top = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, r.getDisplayMetrics());
+        bottom = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 0, r.getDisplayMetrics());
+        right = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 0, r.getDisplayMetrics());
 
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        getWindow().setStatusBarColor(Color.parseColor("#A81E5E4F"));
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
         spManager = new SPManager(this);
 
@@ -73,11 +83,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         btnLogout = findViewById(R.id.btn_keluar);
         buttonLogout = new ProgressButton(MainActivity.this, btnLogout);
+        buttonLogout.changeSizeButton(70);
         btnAbsen = findViewById(R.id.btn_absen);
         buttonAbsen = new ProgressButton(MainActivity.this, btnAbsen);
+        buttonAbsen.changeSizeButton(70);
         btnRiwayat = findViewById(R.id.btn_riwayat);
         buttonRiwayat = new ProgressButton(MainActivity.this, btnRiwayat);
+        buttonRiwayat.changeSizeButton(70);
         progressBar = findViewById(R.id.progress_bar);
+
+        buttonAbsen.setTextButton(txtAbsen, Color.WHITE, Color.parseColor("#A3CCE0"));
+        buttonLogout.setTextButton("Logout", Color.WHITE, Color.parseColor("#A3CCE0"));
+        buttonRiwayat.setTextButton("Riwayat Absen", Color.WHITE, Color.parseColor("#ADF0E8"));
 
         if (!spManager.getSPLogin()) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class)
@@ -96,26 +113,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (spManager.getSpStatusAbsen().equals("")) {
                 chekcAbsenMasuk(karyawan.getNik());
             } else {
-                switch (spManager.getSpStatusAbsen()) {
-                    case "BELUM_ABSEN":
-                        txtPesan.setText("Anda belum absen hari ini !");
-                        txtPesan2.setText("Silahkan klik tombol 'ABSEN MASUK' di bawah !");
-                        txtAbsen = "Absen Masuk";
-                        break;
-                    case "MASUK":
-                        txtPesan.setText("Selamat bekerja");
-                        txtPesan2.setText("Klik tombol 'ABSEN PULANG' jika telah selesai bekerja");
-                        txtAbsen = "Absen Pulang";
-                        break;
-                    case "PULANG":
-                        txtPesan.setText("Terima kasih. Selamat Istirahat.");
-                        txtPesan2.setText("Sampai jumpa besok");
-                        btnAbsen.setVisibility(View.GONE);
-                        break;
+                String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+                if (date.equals(spManager.getSpDateAbsen())) {
+                    switch (spManager.getSpStatusAbsen()) {
+                        case "BELUM_ABSEN":
+                            txtPesan.setText(getString(R.string.msg_blm_absen));
+                            txtPesan2.setText(getString(R.string.msg_blm_absen_sub));
+                            txtAbsen = "Absen Masuk";
+                            break;
+                        case "MASUK":
+                            txtPesan.setText(getString(R.string.msg_absen_pulang));
+                            txtPesan2.setText(getString(R.string.msg_absen_pulang_sub));
+                            txtAbsen = "Absen Pulang";
+                            break;
+                        case "PULANG":
+                            txtPesan.setText(getString(R.string.msg_sudah_absen));
+                            txtPesan2.setText(getString(R.string.msg_sudah_absen_sub));
+                            btnAbsen.setVisibility(View.GONE);
+
+                            lp.setMargins(left, top, right, bottom);
+                            btnLogout.setLayoutParams(lp);
+                            break;
+                    }
+                    buttonAbsen.setTextButton(txtAbsen, Color.WHITE, Color.parseColor("#A3CCE0"));
+                    buttonLogout.setTextButton("Logout", Color.WHITE, Color.parseColor("#A3CCE0"));
+                    buttonRiwayat.setTextButton("Riwayat Absen", Color.WHITE, Color.parseColor("#ADF0E8"));
+                } else {
+                    chekcAbsenMasuk(karyawan.getNik());
                 }
-                buttonAbsen.setTextButton(txtAbsen, Color.WHITE, Color.parseColor("#E6224EA5"));
-                buttonLogout.setTextButton("Logout", Color.WHITE, Color.parseColor("#E6224EA5"));
-                buttonRiwayat.setTextButton("Riwayat Absen", Color.WHITE, Color.parseColor("#E6224EA5"));
             }
         }
 
@@ -150,27 +175,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     JSONObject resObject = new JSONObject(result);
                     JSONArray list = resObject.getJSONArray("data");
 
+                    String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+                    spManager.saveString(SPManager.SP_DATE_ABSEN, date);
+
                     if (list.length() > 0) {
                         Absen absen = new Absen();
                         for (int i = 0; i < list.length(); i++) {
                             JSONObject jsonObject = list.getJSONObject(i);
                             absen = new Absen(jsonObject);
                         }
+
                         if (absen.getTime_out().equals("") || absen.getTime_out().equals("null")) {
-                            txtPesan.setText("Selamat bekerja");
-                            txtPesan2.setText("Klik tombol 'ABSEN PULANG' jika telah selesai bekerja");
+                            txtPesan.setText(getString(R.string.msg_absen_pulang));
+                            txtPesan2.setText(getString(R.string.msg_absen_pulang_sub));
                             spManager.saveString(SPManager.SP_STATUS_ABSEN, "MASUK");
                             spManager.saveInt(SPManager.SP_ID_ABSEN, Integer.parseInt(absen.getId()));
                             txtAbsen = "Absen Pulang";
                         } else {
-                            txtPesan.setText("Terima kasih. Selamat Istirahat.");
-                            txtPesan2.setText("Sampai jumpa besok");
+                            txtPesan.setText(getString(R.string.msg_sudah_absen));
+                            txtPesan2.setText(getString(R.string.msg_sudah_absen_sub));
                             spManager.saveString(SPManager.SP_STATUS_ABSEN, "PULANG");
                             btnAbsen.setVisibility(View.GONE);
+
+                            lp.setMargins(left, top, right, bottom);
+                            btnLogout.setLayoutParams(lp);
                         }
                     } else {
-                        txtPesan.setText("Anda belum absen hari ini !");
-                        txtPesan2.setText("Silahkan klik tombol 'ABSEN MASUK' di bawah !");
+                        txtPesan.setText(getString(R.string.msg_blm_absen));
+                        txtPesan2.setText(getString(R.string.msg_blm_absen_sub));
                         spManager.saveString(SPManager.SP_STATUS_ABSEN, "BELUM_ABSEN");
                         txtAbsen = "Absen Masuk";
                     }
@@ -178,9 +210,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     progressBar.setVisibility(View.GONE);
                     txtPesan.setVisibility(View.VISIBLE);
                     txtPesan2.setVisibility(View.VISIBLE);
-                    buttonAbsen.setTextButton(txtAbsen, Color.WHITE, Color.parseColor("#E6224EA5"));
-                    buttonLogout.setTextButton("Logout", Color.WHITE, Color.parseColor("#E6224EA5"));
-                    buttonRiwayat.setTextButton("Riwayat Absen", Color.WHITE, Color.parseColor("#E6224EA5"));
+                    buttonAbsen.setTextButton(txtAbsen, Color.WHITE, Color.parseColor("#A3CCE0"));
+                    buttonLogout.setTextButton("Logout", Color.WHITE, Color.parseColor("#A3CCE0"));
+                    buttonRiwayat.setTextButton("Riwayat Absen", Color.WHITE, Color.parseColor("#ADF0E8"));
                     btnAbsen.setEnabled(true);
                     btnLogout.setEnabled(true);
                     btnRiwayat.setEnabled(true);
@@ -207,10 +239,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             Handler handler = new Handler();
             handler.postDelayed(() -> {
+
                 Intent intent = new Intent(MainActivity.this, AbsenActivity.class);
                 intent.putExtra(AbsenActivity.EXTRA_ABSEN, txtAbsen);
 
-                buttonAbsen.setTextButton(txtAbsen, Color.WHITE, Color.parseColor("#E6224EA5"));
+                buttonAbsen.setTextButton(txtAbsen, Color.WHITE, Color.parseColor("#A3CCE0"));
                 btnAbsen.setEnabled(true);
                 startActivity(intent);
             }, 500);
@@ -222,11 +255,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Handler handler = new Handler();
             handler.postDelayed(() -> {
 
-                buttonLogout.setTextButton("Logout", Color.WHITE, Color.parseColor("#E6224EA5"));
+                buttonLogout.setTextButton("Logout", Color.WHITE, Color.parseColor("#A3CCE0"));
                 btnLogout.setEnabled(true);
                 spManager.saveString(SPManager.SP_USER, "");
                 spManager.saveString(SPManager.SP_USER_NAME, "");
                 spManager.saveString(SPManager.SP_STATUS_ABSEN, "");
+                spManager.saveString(SPManager.SP_DATE_ABSEN, "");
                 spManager.saveInt(SPManager.SP_USER_ID, 0);
                 spManager.saveInt(SPManager.SP_USER_NIK, 0);
                 spManager.saveInt(SPManager.SP_ID_ABSEN, 0);
@@ -242,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Handler handler = new Handler();
             handler.postDelayed(() -> {
 
-                buttonRiwayat.setTextButton("Riwayat Absen", Color.WHITE, Color.parseColor("#E6224EA5"));
+                buttonRiwayat.setTextButton("Riwayat Absen", Color.WHITE, Color.parseColor("#ADF0E8"));
                 btnRiwayat.setEnabled(true);
                 startActivity(new Intent(MainActivity.this, RiwayatAbsenActivity.class));
             }, 500);
@@ -283,15 +317,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         alBuilderBuilder
                                 .setMessage("Aplikasi ini membutuhkan izin akses kamera dan lokasi, silahkan izinkan aplikasi pada pengaturan perizinan")
                                 .setCancelable(false)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                        Uri uri = Uri.fromParts("package", getPackageName(), null);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        intent.setData(uri);
-                                        startActivity(intent);
-                                    }
+                                .setPositiveButton("OK", (dialog, which) -> {
+                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.setData(uri);
+                                    startActivity(intent);
                                 });
                         AlertDialog alertDialog = alBuilderBuilder.create();
                         alertDialog.show();

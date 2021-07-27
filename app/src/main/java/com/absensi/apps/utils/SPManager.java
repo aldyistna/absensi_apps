@@ -13,6 +13,7 @@ public class SPManager {
     public static final String SP_USER_NAME = "userName";
     public static final String SP_STATUS_ABSEN = "statusAbsen";
     public static final String SP_ID_ABSEN = "idAbsen";
+    public static final String SP_DATE_ABSEN = "dateAbsen";
     public static final String SP_LOGIN = "login";
 
     private final SharedPreferences sp;
@@ -49,6 +50,10 @@ public class SPManager {
 
     public String getSpStatusAbsen() {
         return sp.getString(SP_STATUS_ABSEN, "");
+    }
+
+    public String getSpDateAbsen() {
+        return sp.getString(SP_DATE_ABSEN, "");
     }
 
     public int getSpUserId() {
