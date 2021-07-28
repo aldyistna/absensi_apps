@@ -3,10 +3,10 @@ package com.absensi.apps.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -40,7 +40,6 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -75,27 +74,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         spManager = new SPManager(this);
 
-        TextView txtNIK = findViewById(R.id.txt_nik);
-        TextView txtName = findViewById(R.id.txt_kar);
-        TextView txtJab = findViewById(R.id.txt_jab);
-        txtPesan = findViewById(R.id.txt_absen);
-        txtPesan2 = findViewById(R.id.txt_pesan);
-
-        btnLogout = findViewById(R.id.btn_keluar);
-        buttonLogout = new ProgressButton(MainActivity.this, btnLogout);
-        buttonLogout.changeSizeButton(70);
-        btnAbsen = findViewById(R.id.btn_absen);
-        buttonAbsen = new ProgressButton(MainActivity.this, btnAbsen);
-        buttonAbsen.changeSizeButton(70);
-        btnRiwayat = findViewById(R.id.btn_riwayat);
-        buttonRiwayat = new ProgressButton(MainActivity.this, btnRiwayat);
-        buttonRiwayat.changeSizeButton(70);
-        progressBar = findViewById(R.id.progress_bar);
-
-        buttonAbsen.setTextButton(txtAbsen, Color.WHITE, Color.parseColor("#A3CCE0"));
-        buttonLogout.setTextButton("Logout", Color.WHITE, Color.parseColor("#A3CCE0"));
-        buttonRiwayat.setTextButton("Riwayat Absen", Color.WHITE, Color.parseColor("#ADF0E8"));
-
         if (!spManager.getSPLogin()) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -106,6 +84,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String json = spManager.getSpUser();
 
             Karyawan karyawan = gson.fromJson(json, Karyawan.class);
+
+            TextView txtNIK = findViewById(R.id.txt_nik);
+            TextView txtName = findViewById(R.id.txt_kar);
+            TextView txtJab = findViewById(R.id.txt_jab);
+            txtPesan = findViewById(R.id.txt_absen);
+            txtPesan2 = findViewById(R.id.txt_pesan);
+
+            btnLogout = findViewById(R.id.btn_keluar);
+            buttonLogout = new ProgressButton(MainActivity.this, btnLogout);
+            buttonLogout.changeSizeButton(70);
+            btnAbsen = findViewById(R.id.btn_absen);
+            buttonAbsen = new ProgressButton(MainActivity.this, btnAbsen);
+            buttonAbsen.changeSizeButton(70);
+            btnRiwayat = findViewById(R.id.btn_riwayat);
+            buttonRiwayat = new ProgressButton(MainActivity.this, btnRiwayat);
+            buttonRiwayat.changeSizeButton(70);
+            progressBar = findViewById(R.id.progress_bar);
+
+            buttonAbsen.setTextButton(txtAbsen, Color.WHITE, Color.parseColor("#A3CCE0"));
+            buttonLogout.setTextButton("Logout", Color.WHITE, Color.parseColor("#A3CCE0"));
+            buttonRiwayat.setTextButton("Riwayat Absen", Color.WHITE, Color.parseColor("#ADF0E8"));
+
             txtNIK.setText(karyawan.getNik());
             txtName.setText(karyawan.getName());
             txtJab.setText(karyawan.getJabatan());
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (spManager.getSpStatusAbsen().equals("")) {
                 chekcAbsenMasuk(karyawan.getNik());
             } else {
-                String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+                @SuppressLint("SimpleDateFormat") String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
                 if (date.equals(spManager.getSpDateAbsen())) {
                     switch (spManager.getSpStatusAbsen()) {
                         case "BELUM_ABSEN":
@@ -142,11 +142,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     chekcAbsenMasuk(karyawan.getNik());
                 }
             }
+            btnAbsen.setOnClickListener(this);
+            btnLogout.setOnClickListener(this);
+            btnRiwayat.setOnClickListener(this);
         }
-
-        btnAbsen.setOnClickListener(this);
-        btnLogout.setOnClickListener(this);
-        btnRiwayat.setOnClickListener(this);
     }
 
     private void chekcAbsenMasuk(String nik) {
@@ -164,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonRiwayat.buttonActivated();
         btnRiwayat.setEnabled(false);
 
-        String timeStamp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        @SuppressLint("SimpleDateFormat") String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String paramQuery = "?date=" + timeStamp + "&nik=" + nik;
 
         client.get(API_URL + "api/absens" + paramQuery, new AsyncHttpResponseHandler() {
@@ -175,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     JSONObject resObject = new JSONObject(result);
                     JSONArray list = resObject.getJSONArray("data");
 
-                    String date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+                    @SuppressLint("SimpleDateFormat") String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
                     spManager.saveString(SPManager.SP_DATE_ABSEN, date);
 
                     if (list.length() > 0) {

@@ -143,7 +143,7 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
                 networkInfo = connectivityManager.getActiveNetworkInfo();
             }
             if (currentPhotoPath.equals("")) {
-                makeToast("Tidak ada foto untuk dilaporkan");
+                makeToast("Harap masukkan foto terlebih dahulu!");
                 return;
             }
             if (networkInfo != null && networkInfo.isConnected()) {
@@ -214,7 +214,7 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
                 }
                 if (finalFile != null) {
                     if (finalFile.exists()) {
-                        Boolean deleted = images.delete();
+                        Boolean deleted = finalFile.delete();
                         Log.e(TAG + " onSuccess", String.valueOf(deleted));
                     }
                 }
@@ -386,5 +386,23 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
 
     private void makeToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!currentPhotoPath.equals("")) {
+            File file = new File(currentPhotoPath);
+            if (file.exists()) {
+                Boolean deleted = file.delete();
+                Log.e(TAG + " onback-file delete:", String.valueOf(deleted));
+            }
+        }
+        if (images != null) {
+            if (images.exists()) {
+                Boolean deleted = images.delete();
+                Log.e(TAG + " onback-images delete:", String.valueOf(deleted));
+            }
+        }
+        super.onBackPressed();
     }
 }

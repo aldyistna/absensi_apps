@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.absensi.apps.BuildConfig;
 import com.absensi.apps.R;
 import com.absensi.apps.adapter.AbsenAdapter;
 import com.absensi.apps.entity.Absen;
@@ -27,8 +26,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 
 public class RiwayatAbsenActivity extends AppCompatActivity implements AbsenViewModel.handleFailureLoad {
-    private static final String TAG = RiwayatAbsenActivity.class.getSimpleName();
-    private static final String API_URL = BuildConfig.API_URL;
 
     private ProgressBar progressBar;
     private RecyclerView rvAbsen;
@@ -39,7 +36,6 @@ public class RiwayatAbsenActivity extends AppCompatActivity implements AbsenView
     private SPManager spManager;
 
     ArrayList<Absen> listAbsen = new ArrayList<>();
-    Absen absen = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +54,7 @@ public class RiwayatAbsenActivity extends AppCompatActivity implements AbsenView
         }
 
         viewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(AbsenViewModel.class);
-        viewModel.AbsenViewModel(this);
+        viewModel.AbsenViewModelHandleFail(this);
 
         adapter = new AbsenAdapter(this);
 

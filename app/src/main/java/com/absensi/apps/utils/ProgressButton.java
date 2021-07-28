@@ -40,6 +40,7 @@ public class ProgressButton {
     public void setTextButton(String text, int colorText, int colorButton) {
         progressBar.setVisibility(View.GONE);
         progressBar2.setVisibility(View.GONE);
+        tv.setVisibility(View.VISIBLE);
         tv.setText(text);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         tv.setTextColor(colorText);

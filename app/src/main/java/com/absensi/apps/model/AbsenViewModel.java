@@ -25,7 +25,7 @@ public class AbsenViewModel extends ViewModel {
 
     public handleFailureLoad handleFailureLoad;
 
-    public void AbsenViewModel(handleFailureLoad fail) {
+    public void AbsenViewModelHandleFail(handleFailureLoad fail) {
         handleFailureLoad = fail;
     }
 

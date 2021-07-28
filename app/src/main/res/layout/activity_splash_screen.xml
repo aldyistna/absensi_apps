@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_splash"
+    android:background="@drawable/ic_splash"
     tools:context=".activity.SplashScreenActivity">
 
     <ProgressBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="125dp"
+        android:layout_marginBottom="100dp"
         android:indeterminateDrawable="@drawable/progress"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
