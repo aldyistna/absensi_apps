@@ -70,6 +70,7 @@ public class ProgressButton {
         layout.setBackgroundColor(cardView.getResources().getColor(R.color.green));
         progressBar.setVisibility(View.GONE);
         progressBar2.setVisibility(View.GONE);
+        tv.setVisibility(View.VISIBLE);
         tv.setText(R.string.done);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         tv.setTextColor(Color.WHITE);
