@@ -5,9 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="-5dp"
+    android:paddingBottom="20dp"
+    android:paddingHorizontal="20dp"
     android:background="#E8E6E4"
     android:paddingTop="3dp"
-    tools:context=".activity.RiwayatAbsenActivity">
+    tools:context=".activity.RiwayatLemburActivity">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe"
@@ -15,10 +17,10 @@
         android:layout_height="match_parent">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_absen"
+            android:id="@+id/rv_lembur"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/item_hist_absen_list" />
+            tools:listitem="@layout/item_hist_izin_lembur_list" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ProgressBar

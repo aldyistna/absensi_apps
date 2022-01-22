@@ -45,18 +45,44 @@
         <activity
             android:name=".activity.AbsenActivity"
             android:parentActivityName=".activity.MainActivity"
-            android:theme="@style/NoBarTheme"/>
+            android:theme="@style/NoBarTheme" />
+        <activity
+            android:name=".activity.IzinActivity"
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/NoBarTheme" />
+        <activity
+            android:name=".activity.KegiatanActivity"
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/NoBarTheme" />
+        <activity
+            android:name=".activity.LemburActivity"
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/NoBarTheme" />
+        <activity
+            android:name=".activity.HistoryActivity"
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/NoBarTheme" />
         <activity
             android:name=".activity.RiwayatAbsenActivity"
-            android:parentActivityName=".activity.MainActivity"/>
+            android:parentActivityName=".activity.HistoryActivity" />
+        <activity
+            android:name=".activity.RiwayatKegiatanActivity"
+            android:parentActivityName=".activity.HistoryActivity" />
+        <activity
+            android:name=".activity.RiwayatLemburActivity"
+            android:parentActivityName=".activity.HistoryActivity"/>
+        <activity
+            android:name=".activity.RiwayatIzinActivity"
+            android:parentActivityName=".activity.HistoryActivity" />
         <activity
             android:name=".activity.LoginActivity"
-            android:theme="@style/NoBarTheme"/>
+            android:theme="@style/NoBarTheme" />
         <activity
             android:name=".activity.MainActivity"
-            android:theme="@style/NoBarTheme"/>
-
-        <activity android:name=".activity.SplashScreenActivity"
+            android:theme="@style/NoBarTheme" />
+        <activity
+            android:name=".activity.SplashScreenActivity"
+            android:exported="true"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

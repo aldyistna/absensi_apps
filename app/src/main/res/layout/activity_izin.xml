@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_form"
-    tools:context=".activity.AbsenActivity">
+    tools:context=".activity.IzinActivity">
+
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -124,25 +125,16 @@
                     tools:text="Nama Karyawan"/>
             </RelativeLayout>
 
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/waktu_dan_lokasi"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout1"
-                style="@style/TextProfilePage"/>
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/card_absen"
                 android:padding="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView3">
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout1">
 
                 <TextClock
                     android:id="@+id/text_date"
@@ -168,32 +160,6 @@
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="01:00:00" />
 
-                <fragment
-                    android:id="@+id/map"
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:layout_marginTop="10dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/text_date"
-                    tools:context="com.example.currentplacedetailsonmap.MapsActivityCurrentPlace"
-                    tools:ignore="FragmentTagUsage" />
-
-                <TextView
-                    android:id="@+id/txt_location"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="10dp"
-                    android:textColor="@color/login_color"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/map"
-                    tools:text="LOCATION"/>
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
@@ -201,7 +167,7 @@
                 style="@style/TextProfilePage"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/foto"
+                android:text="@string/keterangan_izin"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
@@ -217,18 +183,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView4">
 
-                <ImageView
-                    android:id="@+id/img_foto"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:maxHeight="350dp"
-                    android:background="@drawable/add_image"
-                    android:contentDescription="@string/foto"
-                    android:scaleType="fitXY"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                <EditText
+                    android:id="@+id/edt_ket"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:inputType="text|textMultiLine"
+                    android:gravity="top"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:importantForAutofill="no"
+                    tools:ignore="LabelFor" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

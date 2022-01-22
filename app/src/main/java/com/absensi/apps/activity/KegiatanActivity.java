@@ -1,21 +1,15 @@
 package com.absensi.apps.activity;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
+import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -23,11 +17,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextClock;
 import android.widget.TextView;
@@ -38,20 +34,6 @@ import com.absensi.apps.R;
 import com.absensi.apps.entity.Karyawan;
 import com.absensi.apps.utils.ProgressButton;
 import com.absensi.apps.utils.SPManager;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -63,42 +45,30 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 import cz.msebera.android.httpclient.Header;
 
-public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallback {
-    private static final String TAG = AbsenActivity.class.getSimpleName();
+public class KegiatanActivity extends AppCompatActivity {
+    private static final String TAG = KegiatanActivity.class.getSimpleName();
     private static final String API_URL = BuildConfig.API_URL;
 
-    public static final String EXTRA_ABSEN = "extra_absen";
-
-    private FusedLocationProviderClient fusedLocationProviderClient;
     private SPManager spManager;
-
-    ImageView imgFoto;
-    TextView titleLocation, txtNIK;
+    InputMethodManager inputManager;
+    TextView txtNIK;
     ProgressButton progressButton, backButton;
     View btnSave, btnBack;
-    //    private SPManager spManager;
+    EditText edtKet;
+    ImageView imgFoto;
+
     File images = null;
     String currentPhotoPath = "";
-    private GoogleMap mMap;
-    private Location lastKnownLocation;
-    private LocationRequest locationRequest;
-    Marker mCurrLocationMarker;
-    private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
-    private static final int DEFAULT_ZOOM = 15;
-    String absen = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_absen);
-
-        absen = getIntent().getStringExtra(EXTRA_ABSEN);
+        setContentView(R.layout.activity_kegiatan);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
@@ -108,6 +78,8 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
         }
 
         spManager = new SPManager(this);
+        inputManager = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE);
 
         TextClock textDate = findViewById(R.id.text_date);
         TextClock textClock = findViewById(R.id.text_clock);
@@ -117,10 +89,10 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
         textClock.setFormat24Hour("HH:mm:ss");
 
         txtNIK = findViewById(R.id.txt_nik);
+        edtKet = findViewById(R.id.edt_ket);
         TextView txtName = findViewById(R.id.txt_name);
         TextView txtPos = findViewById(R.id.txt_posisi);
         TextView txtJab = findViewById(R.id.txt_jab);
-        titleLocation = findViewById(R.id.txt_location);
 
         Gson gson = new Gson();
         String json = spManager.getSpUser();
@@ -136,8 +108,8 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
 
         btnSave = findViewById(R.id.btn_save);
         btnBack = findViewById(R.id.btn_back);
-        progressButton = new ProgressButton(AbsenActivity.this, btnSave);
-        backButton = new ProgressButton(AbsenActivity.this, btnBack);
+        progressButton = new ProgressButton(KegiatanActivity.this, btnSave);
+        backButton = new ProgressButton(KegiatanActivity.this, btnBack);
         progressButton.setTextButton("Save", Color.WHITE, Color.parseColor("#A3CCE0"));
         backButton.setTextButton("Back", Color.WHITE, Color.parseColor("#AE6262"));
 
@@ -152,43 +124,40 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
                 makeToast("Harap masukkan foto terlebih dahulu!");
                 return;
             }
-            if (networkInfo != null && networkInfo.isConnected()) {
-                progressButton.buttonActivatedSave();
-                btnSave.setEnabled(false);
-                btnBack.setEnabled(false);
-                saveAbsen();
+            String ket = edtKet.getText().toString();
+            if (ket.trim().length() > 0) {
+
+                if (inputManager != null) {
+                    if (getCurrentFocus() != null) {
+                        inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                    }
+                }
+
+                if (networkInfo != null && networkInfo.isConnected()) {
+                    progressButton.buttonActivatedSave();
+                    btnSave.setEnabled(false);
+                    btnBack.setEnabled(false);
+                    saveKegiatan(ket);
+                } else {
+                    makeToast(getString(R.string.no_internet));
+                }
             } else {
-                makeToast(getString(R.string.no_internet));
+                makeToast("Keterangan tidak boleh kosong");
             }
         });
-
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(500);
-        locationRequest.setFastestInterval(300);
-        locationRequest.setSmallestDisplacement(5f);
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        assert mapFragment != null;
-        mapFragment.getMapAsync(this);
     }
 
-    private void saveAbsen() {
+    private void saveKegiatan(String ket) {
         AsyncHttpClient client = new AsyncHttpClient();
-        String urlPath = "api/absens";
+        String urlPath = "api/kegiatan";
 
         @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         Date date = new Date();
         String dateNow = dateFormat.format(date);
 
         RequestParams params = new RequestParams();
-        params.put("location", titleLocation.getText());
         params.put("nik", txtNIK.getText());
+        params.put("keterangan", ket);
         params.put("date", dateNow);
         File file = null;
         if (!currentPhotoPath.equals("")) {
@@ -201,10 +170,6 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
                 return;
             }
         }
-        if (spManager.getIdAbsen() != 0) {
-            urlPath = urlPath + "/" + spManager.getIdAbsen();
-        }
-
 
         final File finalFile = file;
         client.post(API_URL + urlPath, params, new AsyncHttpResponseHandler() {
@@ -224,10 +189,10 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
                 }
                 spManager.saveString(SPManager.SP_DATE_ABSEN, "");
                 progressButton.buttonFinished();
-                makeToast("Berhasil " + absen);
+                makeToast("Berhasil save kegiatan");
                 Handler handler = new Handler();
                 handler.postDelayed(() -> {
-                    startActivity(new Intent(AbsenActivity.this, MainActivity.class)
+                    startActivity(new Intent(KegiatanActivity.this, MainActivity.class)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK));
                     finish();
                 }, 500);
@@ -239,7 +204,7 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
                 progressButton.setTextButton("Save", Color.WHITE, Color.parseColor("#A3CCE0"));
                 btnSave.setEnabled(true);
                 btnBack.setEnabled(true);
-                makeToast("Terjadi kesalahan, silahkan absen ulang");
+                makeToast("Terjadi kesalahan, silahkan input kegiatan ulang");
                 Log.e(TAG + " onFailure", Objects.requireNonNull(error.getMessage()));
             }
         });
@@ -301,92 +266,27 @@ public class AbsenActivity extends AppCompatActivity implements OnMapReadyCallba
         }
     }
 
-    @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        mMap = googleMap;
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-            return;
-        }
-
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, new LocationCallback() {
-            @Override
-            public void onLocationResult(@NonNull LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                updateLocationUI();
-                getDeviceLocation();
-            }
-        }, Looper.myLooper());
-        mMap.setMyLocationEnabled(true);
-
-        updateLocationUI();
-        getDeviceLocation();
-    }
-
-    private void updateLocationUI() {
-        if (mMap == null) {
-            return;
-        }
-        try {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        } catch (SecurityException e) {
-            Log.e("Exception: %s", e.getMessage());
-        }
-    }
-
-    private void getDeviceLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-            return;
-        }
-        Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-        locationResult.addOnCompleteListener(this, task -> {
-            if (task.isSuccessful()) {
-                // Set the map's camera position to the current location of the device.
-                lastKnownLocation = task.getResult();
-                if (lastKnownLocation != null) {
-                    if (mCurrLocationMarker != null) {
-                        mCurrLocationMarker.remove();
-                    }
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(lastKnownLocation.getLatitude(),
-                                    lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-
-                    LatLng latLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
-                    Geocoder geo = new Geocoder(AbsenActivity.this, Locale.getDefault());
-                    List<Address> addresses;
-                    try {
-                        addresses = geo.getFromLocation(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(), 1);
-                        if (addresses.isEmpty()) {
-                            titleLocation.setText("-");
-                        }
-                        else {
-                            String addrs = addresses.get(0).getAddressLine(0);
-                            titleLocation.setText(addrs);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } else {
-                mMap.moveCamera(CameraUpdateFactory
-                        .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-                mMap.getUiSettings().setMyLocationButtonEnabled(false);
-            }
-        });
-    }
-
     private void makeToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if ( v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                    v.clearFocus();
+                    inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (inputManager != null) {
+                        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    }
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     @Override

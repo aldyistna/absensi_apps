@@ -23,7 +23,17 @@
     <string name="msg_absen_pulang_sub">Klik tombol \'Absen Pulang\' jika telah selesai bekerja</string>
     <string name="msg_sudah_absen">Terima kasih. Selamat Istirahat.</string>
     <string name="msg_sudah_absen_sub">Sampai jumpa besok</string>
+    <string name="msg_izin">Anda izin hari ini</string>
+    <string name="msg_izin_sub">Sampai jumpa besok</string>
     <string name="pulang">Pulang</string>
     <string name="masuk">Masuk</string>
     <string name="no_data">Anda belum pernah absen</string>
+    <string name="posisi">Posisi</string>
+    <string name="jabatan">Jabatan</string>
+    <string name="menu_history">Menu History</string>
+    <string name="keterangan_izin">Keterangan Izin</string>
+    <string name="keterangan_keg">Keterangan Kegiatan</string>
+    <string name="bukti_foto">Bukti Foto</string>
+    <string name="keterangan_lembur">Keterangan Lembur</string>
+    <string name="kegiatan">Kegiatan</string>
 </resources>

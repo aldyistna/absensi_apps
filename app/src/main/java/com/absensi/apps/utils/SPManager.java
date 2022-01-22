@@ -12,6 +12,8 @@ public class SPManager {
     public static final String SP_USER_NIK = "userNIK";
     public static final String SP_USER_NAME = "userName";
     public static final String SP_STATUS_ABSEN = "statusAbsen";
+    public static final String SP_STATUS_IZIN = "statusIzin";
+    public static final String SP_STATUS_LEMBUR = "statusLembur";
     public static final String SP_ID_ABSEN = "idAbsen";
     public static final String SP_DATE_ABSEN = "dateAbsen";
     public static final String SP_LOGIN = "login";
@@ -44,21 +46,29 @@ public class SPManager {
         return sp.getString(SP_USER, "");
     }
 
-    public String getSpUserName() {
+    /*public String getSpUserName() {
         return sp.getString(SP_USER_NAME, "");
-    }
+    }*/
 
     public String getSpStatusAbsen() {
         return sp.getString(SP_STATUS_ABSEN, "");
+    }
+
+    public String getSpStatusIzin() {
+        return sp.getString(SP_STATUS_IZIN, "N");
+    }
+
+    public String getSpStatusLembur() {
+        return sp.getString(SP_STATUS_LEMBUR, "Y");
     }
 
     public String getSpDateAbsen() {
         return sp.getString(SP_DATE_ABSEN, "");
     }
 
-    public int getSpUserId() {
+    /*public int getSpUserId() {
         return sp.getInt(SP_USER_ID, 0);
-    }
+    }*/
 
     public int getSpUserNIK() {
         return sp.getInt(SP_USER_NIK, 0);

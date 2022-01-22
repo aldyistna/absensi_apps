@@ -2,7 +2,6 @@ package com.absensi.apps.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,13 +30,12 @@ public class AbsenAdapter extends RecyclerView.Adapter<AbsenAdapter.ViewHolder> 
     public void setData(ArrayList<Absen> items) {
         listAbsen.clear();
         listAbsen.addAll(items);
-        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_hist_absen_list, parent, false);
         return new ViewHolder(view);
     }
 
@@ -82,9 +80,6 @@ public class AbsenAdapter extends RecyclerView.Adapter<AbsenAdapter.ViewHolder> 
                 }
 
                 assert dateIn != null;
-                String test =  DateFormat.getDateTimeInstance().format(dateIn);
-                Log.d("TAG", "bind: " + absen.getTime_in());
-                Log.d("TAG", "bind: " + test);
                 String date = df1.format(dateIn);
                 String timeIn = df2.format(dateIn);
 

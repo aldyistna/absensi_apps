@@ -16,31 +16,31 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.absensi.apps.R;
-import com.absensi.apps.adapter.AbsenAdapter;
-import com.absensi.apps.entity.Absen;
+import com.absensi.apps.adapter.IzinAdapter;
+import com.absensi.apps.entity.Izin;
 import com.absensi.apps.entity.Karyawan;
-import com.absensi.apps.model.AbsenViewModel;
+import com.absensi.apps.model.IzinViewModel;
 import com.absensi.apps.utils.SPManager;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
-public class RiwayatAbsenActivity extends AppCompatActivity implements AbsenViewModel.handleFailureLoad {
+public class RiwayatIzinActivity extends AppCompatActivity implements IzinViewModel.handleFailureLoad {
 
     private ProgressBar progressBar;
-    private RecyclerView rvAbsen;
-    private AbsenViewModel viewModel;
-    private AbsenAdapter adapter;
+    private RecyclerView rvIzin;
+    private IzinViewModel viewModel;
+    private IzinAdapter adapter;
     private SwipeRefreshLayout swipe;
     private TextView txtEmpty;
     private SPManager spManager;
 
-    ArrayList<Absen> listAbsen = new ArrayList<>();
+    ArrayList<Izin> listData = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_riwayat_absen);
+        setContentView(R.layout.activity_riwayat_izin);
 
         spManager = new SPManager(this);
 
@@ -50,18 +50,18 @@ public class RiwayatAbsenActivity extends AppCompatActivity implements AbsenView
         Karyawan karyawan = gson.fromJson(json, Karyawan.class);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Absen - " + karyawan.getName() + " - " + spManager.getSpUserNIK());
+            getSupportActionBar().setTitle("Izin - " + karyawan.getName() + " - " + spManager.getSpUserNIK());
         }
 
-        viewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(AbsenViewModel.class);
-        viewModel.AbsenViewModelHandleFail(this);
+        viewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(IzinViewModel.class);
+        viewModel.IzinViewModelHandleFail(this);
 
-        adapter = new AbsenAdapter(this);
+        adapter = new IzinAdapter(this);
 
-        rvAbsen = findViewById(R.id.rv_absen);
+        rvIzin = findViewById(R.id.rv_izin);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(RecyclerView.VERTICAL);
-        rvAbsen.setLayoutManager(layoutManager);
+        rvIzin.setLayoutManager(layoutManager);
 
         txtEmpty = findViewById(R.id.empty_text);
         swipe = findViewById(R.id.swipe);
@@ -71,7 +71,7 @@ public class RiwayatAbsenActivity extends AppCompatActivity implements AbsenView
             getData();
         });
 
-        viewModel.getAbsenList().observe(this, getAbsen);
+        viewModel.getIzinList().observe(this, getDatas);
         getData();
     }
 
@@ -83,33 +83,33 @@ public class RiwayatAbsenActivity extends AppCompatActivity implements AbsenView
         }
         if (networkInfo != null && networkInfo.isConnected()) {
             txtEmpty.setVisibility(View.GONE);
-            rvAbsen.setVisibility(View.VISIBLE);
-            viewModel.setAbsen(String.valueOf(spManager.getSpUserNIK()));
+            rvIzin.setVisibility(View.VISIBLE);
+            viewModel.setIzin(String.valueOf(spManager.getSpUserNIK()));
             showLoading(true);
         } else {
             txtEmpty.setText(getString(R.string.no_internet));
             txtEmpty.setVisibility(View.VISIBLE);
-            rvAbsen.setVisibility(View.GONE);
+            rvIzin.setVisibility(View.GONE);
             showLoading(false);
         }
     }
 
-    private final Observer<ArrayList<Absen>> getAbsen = new Observer<ArrayList<Absen>>() {
+    private final Observer<ArrayList<Izin>> getDatas = new Observer<ArrayList<Izin>>() {
         @Override
-        public void onChanged(ArrayList<Absen> absens) {
-            if (absens != null) {
-                if (absens.size() > 0) {
-                    listAbsen = absens;
+        public void onChanged(ArrayList<Izin> izins) {
+            if (izins != null) {
+                if (izins.size() > 0) {
+                    listData = izins;
                     txtEmpty.setVisibility(View.GONE);
-                    rvAbsen.setVisibility(View.VISIBLE);
+                    rvIzin.setVisibility(View.VISIBLE);
 
-                    adapter.setData(listAbsen);
-                    rvAbsen.setAdapter(adapter);
+                    adapter.setData(listData);
+                    rvIzin.setAdapter(adapter);
                 } else {
-                    String sMatch = "Anda belum pernah absen";
+                    String sMatch = "Anda belum pernah izin";
                     txtEmpty.setText(sMatch);
                     txtEmpty.setVisibility(View.VISIBLE);
-                    rvAbsen.setVisibility(View.GONE);
+                    rvIzin.setVisibility(View.GONE);
                 }
                 showLoading(false);
             }
@@ -131,7 +131,7 @@ public class RiwayatAbsenActivity extends AppCompatActivity implements AbsenView
         String sMatch = "Terjadi kesalahan, silahkan refresh halaman";
         txtEmpty.setText(sMatch);
         txtEmpty.setVisibility(View.VISIBLE);
-        rvAbsen.setVisibility(View.GONE);
+        rvIzin.setVisibility(View.GONE);
         showLoading(false);
     }
 }

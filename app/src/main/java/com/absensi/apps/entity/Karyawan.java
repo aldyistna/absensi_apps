@@ -9,6 +9,7 @@ public class Karyawan implements Parcelable {
     private String id;
     private String nik;
     private String name;
+    private String posisi;
     private String jabatan;
     private String username;
 
@@ -19,6 +20,7 @@ public class Karyawan implements Parcelable {
             this.id = object.getString("id");
             this.nik = object.getString("nik");
             this.name = object.getString("name");
+            this.posisi = object.getString("posisi");
             this.jabatan = object.getString("jabatan");
             this.username = object.getString("username");
         } catch (Exception e) {
@@ -30,6 +32,7 @@ public class Karyawan implements Parcelable {
         id = in.readString();
         nik = in.readString();
         name = in.readString();
+        posisi = in.readString();
         jabatan = in.readString();
         username = in.readString();
     }
@@ -70,20 +73,12 @@ public class Karyawan implements Parcelable {
         this.name = name;
     }
 
+    public String getPosisi() {
+        return posisi;
+    }
+
     public String getJabatan() {
         return jabatan;
-    }
-
-    public void setJabatan(String jabatan) {
-        this.jabatan = jabatan;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     @Override
@@ -96,6 +91,7 @@ public class Karyawan implements Parcelable {
         dest.writeString(id);
         dest.writeString(nik);
         dest.writeString(name);
+        dest.writeString(posisi);
         dest.writeString(jabatan);
         dest.writeString(username);
     }
